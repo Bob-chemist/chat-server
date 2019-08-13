@@ -1,26 +1,41 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var db = require('./queries');
 
-app.get('/', function(req, res){
+app.get('/', (req, res) => {
   res.sendfile('index.html');
 });
 
-io.on('connection', function(socket){
-  console.log('user connected');
-  socket.on('chat message', function(msg){
+const connectedUsers = {};
+
+io.on('connection', socket => {
+
+  socket.on('name', name => {
+    connectedUsers[name] = socket;
+    console.log(name + ' connected');
+    
+    db.getMessages(1)
+      .then(messages => {
+        connectedUsers[name].emit('private message', messages.length ? messages : {status: 404, date: new Date()});
+      })
+  });  
+
+  socket.on('chat message', (from, msg) => {
+    console.log(from);
+    
     io.emit('chat message', msg);
   });
 
-  socket.on('message', function(msg){
-    io.emit('message', msg)
+  socket.on('private message', msg => {
+    connectedUsers[msg.receiver].emit('private message', msg);        
   });
   
-  socket.on('disconnect', function(){
+  socket.on('disconnect', () => {
     console.log('user disconnected');
   });
 });
 
-http.listen(3000, function(){
+http.listen(3000, () => {
   console.log('listening on *:3000');
 });
