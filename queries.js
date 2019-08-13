@@ -1,4 +1,4 @@
-let pgp = require("pg-promise")(),
+const pgp = require("pg-promise")(),
     db = pgp("postgres://postgres:postgres@localhost:5432/notifications");
 
 const getMessages = (id = 0) => {
