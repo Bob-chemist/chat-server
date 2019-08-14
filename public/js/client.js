@@ -69,12 +69,12 @@ socket.on('chat message', msg => {
 });
 
 socket.on('user connected', userId => {
-    document.getElementById('userNameId' + userId).className = 'online';
+    document.getElementById('userNameId' + userId).classList.add('online');
     console.log(users[userId] + ' connected');    
 });
 
 socket.on('user disconnected', userId => {
-    document.getElementById('userNameId' + userId).className = '';
+    document.getElementById('userNameId' + userId).classList.remove('online');
     console.log(users[userId] + ' disconnected');
 });
 

@@ -2,7 +2,7 @@ const pgp = require("pg-promise")(),
     db = pgp("postgres://postgres:postgres@localhost:5432/notifications");
 
 const getMessages = (id = 0, receiver) => {
-    return db.any("select * from notification where id > $1 and receiver = $2 order by id", [id, receiver])
+    return db.any("select * from notification where id > $1 and receiver = $2 or author = $2 and receiver <> 0 order by id", [id, receiver])
         .then(data => data);
 };
 

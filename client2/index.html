@@ -6,25 +6,25 @@
     <script src="./js/socket.io.js"></script>    
   </head>
   <body>
-    <div class="chat">
-      <div class="chatwindow">
-         <h2>Сообщение для 
-          <select id="private-selection">
-           
-          </select>
-        </h2>
-        <ul id="private" class="private "></ul>
+    <div id="chat" class="chat">
+      <div class="users-window">
+        <h2>Пользователи</h2>
+        <ul id="users-list" class="users-list">
+          <li id="userNameId0" class="selected" onclick="chooseChat(event)">Общий чат</li>
+        </ul>
       </div>
-      <div class="chatwindow">
-        <h2>Общий чат</h2>
-        <ul id="chat" class="common"></ul>
-      </div>
+      <div id="chat-window" class="chat-window">
+        <div id="chatId0">
+          <h2>Общий чат</h2>
+          <ul id="userChatId0"></ul>
+        </div>        
+      </div>      
     </div>
     
     <div class="input">
       <input id="m" autocomplete="off" />
       <button onclick="send()">Send</button>
-      <button onclick="sendToAll()">Send to all</button>
+      
     </div> 
     <script src="./js/client.js"></script>
   </body>

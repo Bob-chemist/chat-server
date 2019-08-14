@@ -1,7 +1,7 @@
 * {
     margin: 0; 
     padding: 0; 
-    box-sizing: border-box; 
+    box-sizing: border-box;
   }
   body { 
     font: 13px Helvetica, Arial;
@@ -16,7 +16,7 @@
   .input input { 
     border: 0; 
     padding: 10px; 
-    width: 80%; 
+    width: 90%; 
     margin-right: .5%; 
   }
  .input button { 
@@ -29,19 +29,55 @@
   .chat {
       display: flex;
   }
-  .chatwindow {
-      width: 50%;
+  .chat-window {
+      width: 45%;
       margin: 5px;
       padding: 10px 0 0 10px;
   }
-  #chat, #private { 
+  .users-window {
+    width: 10%;
+    margin: 5px;
+    padding: 10px 0 0 10px;
+  }
+  .users-list {
+
+  }
+  .users-list .online {
+    color: green;
+  }
+  .selected {
+    border: 1px solid gray;
+    border-radius: 5px;
+  }
+  .users-list .online::after {
+    content: '';
+    display: inline-block;
+    margin-left: 10px;
+    width: 12px;
+    height: 12px;
+    background: green;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+  }
+  .users-list li {
+    font-size: 16px;
+    width: 100%;
+    list-style-type: none;
+    margin-top: 5px;
+    cursor: pointer;
+    line-height: 28px;
+    padding-left: 7px;
+  }
+
+  .chat-window ul { 
     list-style-type: none; 
     margin: 0; 
     padding: 0; 
   }
-  #chat li, #private  li { 
+  .chat-window  li { 
     padding: 5px 10px; 
   }
-  #chat li:nth-child(odd), #private  li:nth-child(odd) { 
+  .chat-window  li:nth-child(odd) { 
     background: #eee; 
   }
