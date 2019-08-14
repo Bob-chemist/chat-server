@@ -1,19 +1,16 @@
 <!doctype html>
 <html>
   <head>
-    <title>Socket.IO chat</title>
-    <link rel="stylesheet" href="css/style.css">
-    <!-- <script src="/lib/angular/angular.js?x42213"></script> -->
-    <script src="../node_modules/socket.io-client/dist/socket.io.js"></script>    
+    <title>Socket.IO chat for Mary</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/socket.io.js"></script>    
   </head>
   <body>
     <div class="chat">
       <div class="chatwindow">
          <h2>Сообщение для 
           <select id="private-selection">
-            <option value="Bob">Bob</option>
-            <option value="John">John</option>
-            <option value="Mary">Mary</option>
+           
           </select>
         </h2>
         <ul id="private" class="private "></ul>
@@ -22,8 +19,6 @@
         <h2>Общий чат</h2>
         <ul id="chat" class="common"></ul>
       </div>
-      
-      
     </div>
     
     <div class="input">
@@ -31,6 +26,6 @@
       <button onclick="send()">Send</button>
       <button onclick="sendToAll()">Send to all</button>
     </div> 
-    <script src="js/client.js"></script>
+    <script src="./js/client.js"></script>
   </body>
 </html>

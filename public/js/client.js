@@ -1,6 +1,6 @@
 const socket = io.connect('http://localhost:3000'); //Подключаемся к нашему соккету
-const me = 2;
-users = {[me]: 'John'};
+const me = 1;
+users = {[me]: 'Bob'};
 
 socket.on('connect', () => { //При успешном соединении с сервером    
     console.info("Connected to server");
