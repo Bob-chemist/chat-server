@@ -39,23 +39,27 @@ const connectedUsers = {};
 
 io.on('connection', socket => {
 
-  socket.on('name', name => {
-    connectedUsers[name] = socket;
-    console.log(name + ' connected');
-    db.getUserNames(name)
+  socket.on('name', userId => {
+    connectedUsers[userId] = socket;
+    console.log(userId + ' connected');
+    db.getUserNames(userId)
       .then(userList => {
-        connectedUsers[name].emit('userList', userList)
-      });    
+        userList.forEach(user => {
+          user.connected = connectedUsers[user.userid] ? true : false;
+        });
+        connectedUsers[userId].emit('userList', userList);
+      });
+    socket.broadcast.emit('user connected', userId);
   });
 
-  socket.on('userList loaded', name => {
-    db.getMessages(1, 1)
+  socket.on('userList loaded', userId => {
+    db.getMessages(1, userId)
       .then(messages => {        
-        connectedUsers[name].emit('private message', messages);
+        connectedUsers[userId].emit('private message', messages);
       });
     db.getMessages(1, 0)
       .then(messages => {
-        connectedUsers[name].emit('chat message', messages)
+        connectedUsers[userId].emit('chat message', messages)
       });
   })
 
@@ -72,6 +76,12 @@ io.on('connection', socket => {
   });
   
   socket.on('disconnect', () => {
+    for (let userId in connectedUsers) {
+      if (connectedUsers[userId] === socket) {
+        delete connectedUsers[userId];
+        io.emit('user disconnected', userId);
+      }      
+    }    
     console.log('user disconnected');
   });
 });

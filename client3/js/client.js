@@ -59,11 +59,19 @@ socket.on('private message', msg => { //Когда с сервера прихо�
     
 });
 
+socket.on('user connected', userId => {
+    console.log(users[userId] + ' connected');    
+});
+
 socket.on('chat message', msg => {
     console.info(msg);
     msg.forEach(el => {
         addMessage(el, 'chat')
     });
+});
+
+socket.on('user disconnected', userId => {
+    console.log(users[userId] + ' disconnected');    
 });
 
 const addMessage = (msg, target) => {

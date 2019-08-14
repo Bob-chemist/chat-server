@@ -66,6 +66,14 @@ socket.on('chat message', msg => {
     });
 });
 
+socket.on('user connected', userId => {
+    console.log(users[userId] + ' connected');    
+});
+
+socket.on('user disconnected', userId => {
+    console.log(users[userId] + ' disconnected');    
+});
+
 const addMessage = (msg, target) => {
     const li = document.createElement("li");
     let date;
