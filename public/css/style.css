@@ -81,3 +81,8 @@
   .chat-window  li:nth-child(odd) { 
     background: #eee; 
   }
+
+  .userchat {
+    overflow-y: auto;
+    max-height: 90vh;
+  }

@@ -31,6 +31,7 @@ socket.on('userList', userList => {
 
         const chatWindow = document.createElement('div');
         chatWindow.id = 'chatId' + user.userid;
+        chatWindow.className = 'userchat'
         chatWindow.style.display = 'none';
         chatWindow.innerHTML = '' +            
             '<h2>' + user.name + '</h2>' +
@@ -58,24 +59,26 @@ function send() {
     addMessage(message);
 }
 
-socket.on('private message', msg => { //Когда с сервера приходит сообщение    
-    console.info(msg);
+socket.on('private message', msg => { 
     msg.forEach(el => addMessage(el));    
 });
 
 socket.on('chat message', msg => {
-    console.info(msg);
     msg.forEach(el => addMessage(el));
 });
 
 socket.on('user connected', userId => {
+    if (userId === me) {
+        return;
+    }
     document.getElementById('userNameId' + userId).classList.add('online');
-    console.log(users[userId] + ' connected');    
 });
 
 socket.on('user disconnected', userId => {
+    if (userId === me) {
+        return;
+    }
     document.getElementById('userNameId' + userId).classList.remove('online');
-    console.log(users[userId] + ' disconnected');
 });
 
 const addMessage = (msg) => {
@@ -91,11 +94,14 @@ const addMessage = (msg) => {
     li.innerHTML = users[msg.author] + ' [' + date + ']: <br>' + msg.message;
     if (+msg.receiver === 0) {
         document.getElementById('userChatId0').appendChild(li);
+        document.getElementById('userChatId0').lastChild.scrollIntoView({block: "nearest", behavior: "smooth"});
     } else if (+msg.author === me) {
         document.getElementById('userChatId' + msg.receiver).appendChild(li);
+        document.getElementById('userChatId' + msg.receiver).lastChild.scrollIntoView({block: "nearest", behavior: "smooth"});
     } else {
         document.getElementById('userChatId' + msg.author).appendChild(li);
-    }
+        document.getElementById('userChatId' + msg.author).lastChild.scrollIntoView({block: "nearest", behavior: "smooth"});
+    }    
 };
 
 const chooseChat = event => {

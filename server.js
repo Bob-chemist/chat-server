@@ -3,43 +3,14 @@ var express = require('express')
     http = require('http').Server(app),
     io = require('socket.io')(http),
     db = require('./queries'),
-    passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy,
     path = require('path'),
 
-    indexRouter = require('./routes/index'),
     loginRouter = require('./routes/login');
 
-  app.use(express.static(path.join(__dirname, 'public')));
-// passport.use(new LocalStrategy(
-//   function(username, password, done) {
-//     User.findOne({ username: username }, function(err, user) {
-//       if (err) { return done(err); }
-//       if (!user) {
-//         return done(null, false, { message: 'Incorrect username.' });
-//       }
-//       if (!user.validPassword(password)) {
-//         return done(null, false, { message: 'Incorrect password.' });
-//       }
-//       return done(null, user);
-//     });
-//   }
-// ));
+    
+app.use(express.static(path.join(__dirname, 'public')));
 
-// app.post('/login',
-//   passport.authenticate('local', { successRedirect: '/',
-//                                    failureRedirect: '/login',
-//                                    failureFlash: true })
-// );
-
-// app.get('/', (req, res) => {
-//   res.sendfile('index.html', {root: __dirname + '/client/'});
-// });
-
-app.use('/', indexRouter);
-app.use('/login', loginRouter);
-// app.use(passport.initialize());
-// app.use(passport.session());
+app.use('/', loginRouter.router);
 
 const connectedUsers = {};
 

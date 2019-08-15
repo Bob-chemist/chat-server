@@ -20,9 +20,9 @@ const getUserNames = author => {
 }
 
 const authorize = (login, password) => {
-    return db.any(
-        'select * from users where name like $1 and password like $2', [login, password]
-    ).then(data => data.length ? true : false)
+    return db.oneOrNone(
+        'select distinct userid, name from users where name like $1 and password like $2', [login, password])
+        .then(data => data);    
 }
 
 module.exports = {
