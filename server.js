@@ -1,12 +1,16 @@
 var express = require('express')
-    app = express(),    
+    app = express(),
     http = require('http').Server(app),
     io = require('socket.io')(http),
     db = require('./queries'),
     passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
-    path = require('path');
+    path = require('path'),
 
+    indexRouter = require('./routes/index'),
+    loginRouter = require('./routes/login');
+
+  app.use(express.static(path.join(__dirname, 'public')));
 // passport.use(new LocalStrategy(
 //   function(username, password, done) {
 //     User.findOne({ username: username }, function(err, user) {
@@ -28,10 +32,12 @@ var express = require('express')
 //                                    failureFlash: true })
 // );
 
-app.get('/', (req, res) => {
-  res.sendfile('index.html', {root: __dirname + '/client/'});
-});
-app.use(express.static(path.join(__dirname, 'public')));
+// app.get('/', (req, res) => {
+//   res.sendfile('index.html', {root: __dirname + '/client/'});
+// });
+
+app.use('/', indexRouter);
+app.use('/login', loginRouter);
 // app.use(passport.initialize());
 // app.use(passport.session());
 
