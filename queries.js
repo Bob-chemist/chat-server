@@ -19,6 +19,12 @@ const getUserNames = author => {
     ).then(data => data)
 }
 
+const getPreviousMessages = (author, receiver, timestamp) => {
+    return db.any(
+        'select * from notification where id > $3 and author = $1 and receiver = $2 order by id desc limit 10', [author, receiver, timestamp])
+        .then(data => data);
+}
+
 const authorize = (login, password) => {
     return db.oneOrNone(
         'select distinct userid, name from users where name like $1 and password like $2', [login, password])

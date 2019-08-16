@@ -3,11 +3,13 @@ const express = require('express'),
     bodyParser = require('body-parser'),
     db = require('../queries');
 
+router.use(bodyParser.urlencoded({extended: false}));
+
 router.get('/', (req, res, next) => {
     res.sendFile('login.html', { root: __dirname + '/../public/views' });
 });
 
-router.post('/', bodyParser.urlencoded({extended: false}), (req, res, next) => {
+router.post('/', (req, res, next) => {
     console.log(req.body);
     db.authorize(req.body.username, req.body.password).then(data => {
         if (data) {
