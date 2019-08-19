@@ -8,6 +8,8 @@ logs
 *.log
 npm-debug.log*
 
+# VS Code files
+/.vscode
 
 # Dependency directories
 /node_modules

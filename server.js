@@ -48,7 +48,7 @@ io.on('connection', socket => {
 
   socket.on('chat message', msg => {
     console.log(msg);
-    
+
     db.createMessage(msg);
     socket.broadcast.emit('chat message', [msg]);
   });
