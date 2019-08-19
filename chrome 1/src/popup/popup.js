@@ -1,11 +1,12 @@
-import io from 'socket.io-client';
+let users = {};
+let me;
+chrome.storage.sync.get(['code'], result => {
+  me = result.code; 
+});
 
-const socket = io.connect('http://localhost:3000');
-const me = chrome.storage.sync.get(['code'], result => result.code);
-
-const users = { [me]: 'Bob' };
 const messageInput = document.getElementById('m');
-document.getElementById('userNameId0').onclick = event => chooseChat(event);
+
+document.getElementById('userNameId_chat').onclick = event => chooseChat(event);
 document.getElementById('sendbutton').onclick = () => send();
 
 messageInput.addEventListener('keydown', function(event) {
@@ -15,108 +16,106 @@ messageInput.addEventListener('keydown', function(event) {
   }
 });
 
-socket.on('connect', () => {
-  //При успешном соединении с сервером
-  console.info('Connected to server');
-  socket.emit('name', me);
+var port = chrome.runtime.connect({
+  name: "Sample Communication"
+});
+port.postMessage("Hi BackGround");
+
+//for listening any message which comes from runtime
+port.onMessage.addListener(function(msg) {
+  console.log(msg);
+  
+  switch (msg.id) {
+    case 'userList':
+      users = msg.userList;      
+      createUserList(users);
+      break;
+    case 'messageList':
+      const {messageList} = msg
+      messageList.forEach(message => addMessage(message));
+      break;
+    case 'connected':
+      userConnected(msg.userId);
+      break;
+    case 'disconnected':
+      userDisconnected(msg.userId);
+      break;
+    default:
+      break;
+  }
 });
 
-socket.on('userList', userList => {
+const createUserList = userList => {
   const ul = document.getElementById('users-list'),
     chat = document.getElementById('chat-window');
 
-  userList.forEach(user => {
-    users[user.userid] = user.name;
+  for (let userid in userList) {    
+    if (document.getElementById('userNameId' + userid)) {
+      continue;
+    }
+    if (userid === me) continue;
 
+    const {name, connected} = userList[userid];    
     const li = document.createElement('li');
-    li.className = user.connected ? 'online' : '';
-    li.innerHTML = user.name;
-    li.id = 'userNameId' + user.userid;
+    li.className = connected ? 'online' : '';
+    li.innerHTML = name;
+    li.id = 'userNameId' + userid;
     li.onclick = event => chooseChat(event);
     ul.appendChild(li);
 
     const chatWindow = document.createElement('div');
-    chatWindow.id = 'chatId' + user.userid;
+    chatWindow.id = 'chatId' + userid;
     chatWindow.className = 'userchat';
     chatWindow.style.display = 'none';
-    chatWindow.innerHTML =
-      '' +
+    chatWindow.innerHTML = '' +
       '<h2>' +
-      user.name +
+      '' + name +
       '</h2>' +
-      '<ul id="userChatId' +
-      user.userid +
-      '"></ul>';
+      '<ul id="userChatId' + userid + '"></ul>';
 
     chat.appendChild(chatWindow);
-  });
-  socket.emit('userList loaded', me);
-});
+  }
+};
 
-function send() {
-  const input = document.getElementById('m'),
-    receiver = +document.querySelector('.selected').id.match(/[0-9]/g),
-    message = {
-      author: me,
-      message: input.value,
-      receiver,
-    };
-  receiver !== 0
-    ? socket.emit('private message', message)
-    : socket.emit('chat message', message);
-  input.value = '';
-  input.focus();
-  message.id = new Date().getTime();
-  addMessage(message);
-}
-
-socket.on('private message', msg => {
-  msg.forEach(el => addMessage(el));
-});
-
-socket.on('chat message', msg => {
-  msg.forEach(el => addMessage(el));
-});
-
-socket.on('user connected', userId => {
+function userConnected(userId) {
   if (userId === me) {
     return;
   }
   document.getElementById('userNameId' + userId).classList.add('online');
-});
+}
 
-socket.on('user disconnected', userId => {
+function userDisconnected(userId) {
   if (userId === me) {
     return;
   }
   document.getElementById('userNameId' + userId).classList.remove('online');
-});
+}
 
-const addMessage = msg => {
+const addMessage = ({id , message, author, receiver}) => {
   const li = document.createElement('li');
-  let date;
+  let date;  
 
-  if (msg.id) {
-    date = new Date(+msg.id).toLocaleString();
+  if (id) {
+    date = new Date(+id).toLocaleString();
   } else {
     date = new Date().toLocaleString();
   }
 
-  li.innerHTML = users[msg.author] + ' [' + date + ']: <br>' + msg.message;
-  if (+msg.receiver === 0) {
-    document.getElementById('userChatId0').appendChild(li);
+  li.innerHTML = users[author].name + ' [' + date + ']: <br>' + message;
+  if (receiver === '_chat') {
+    document.getElementById('userChatId_chat').appendChild(li);
     document
-      .getElementById('userChatId0')
+      .getElementById('userChatId_chat')
       .lastChild.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  } else if (+msg.author === me) {
-    document.getElementById('userChatId' + msg.receiver).appendChild(li);
+  } else if (author === me) {
+    document.getElementById('userChatId' + receiver).appendChild(li);
     document
-      .getElementById('userChatId' + msg.receiver)
+      .getElementById('userChatId' + receiver)
       .lastChild.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   } else {
-    document.getElementById('userChatId' + msg.author).appendChild(li);
+    document.getElementById('userChatId' + author).appendChild(li);
     document
-      .getElementById('userChatId' + msg.author)
+      .getElementById('userChatId' + author)
       .lastChild.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 };
@@ -124,9 +123,24 @@ const addMessage = msg => {
 const chooseChat = event => {
   document.querySelector('.selected').classList.remove('selected');
   event.target.classList.add('selected');
-  let userId = +event.target.id.match(/[0-9]/g);
+  let userId = event.target.id.substr('userNameId'.length);
   Array.from(document.getElementById('chat-window').children).forEach(
     el => (el.style.display = 'none'),
   );
   document.getElementById('chatId' + userId).style.display = '';
 };
+
+function send() {
+  const input = document.getElementById('m'),
+    receiver = document.querySelector('.selected').id.substr('userNameId'.length),
+    message = {
+      author: me,
+      message: input.value,
+      receiver,
+    };
+  port.postMessage(message);
+  input.value = '';
+  input.focus();
+  message.id = new Date().getTime();
+  addMessage(message);
+}

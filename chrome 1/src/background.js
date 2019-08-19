@@ -1,3 +1,65 @@
+const users = {};
+let me;
+let messages = [];
+chrome.storage.sync.get(['code'], result => {
+  me = result.code;  
+});
+
+//for sending a message
+const sendToPopup = (msg) => chrome.runtime.sendMessage(msg);
+
+import io from 'socket.io-client';
+
+const socket = io.connect('http://localhost:3000');
+
+socket.on('connect', () => {
+  //При успешном соединении с сервером
+  console.info('Connected to server');
+  socket.emit('name', me);
+});
+
+socket.on('userList', userList => {
+  userList.forEach(user => users[user.userid] = user);
+  socket.emit('userList loaded', me);
+});
+
+chrome.runtime.onConnect.addListener(function(port) {
+  port.onMessage.addListener(function(message) {
+    console.log(message);
+    port.postMessage({id: 'userList', userList: users});
+    port.postMessage({id: 'messageList', messageList: messages});    
+
+    if (message.receiver) {      
+      message.receiver !== '_chat'
+        ? socket.emit('private message', message)
+        : socket.emit('chat message', message);
+    }
+    
+  });
+});
+
+socket.on('private message', msg => {
+  messages = [...messages, ...msg];
+});
+
+socket.on('chat message', msg => {
+  messages = [...messages, ...msg];
+});
+
+socket.on('user connected', userId => {
+  if (userId === me) {
+    return;
+  }
+  sendToPopup({id: 'connected', userId});
+});
+
+socket.on('user disconnected', userId => {
+  if (userId === me) {
+    return;
+  }
+  sendToPopup({id: 'disconnected', userId})
+});
+
 chrome.alarms.create('1min', {
   // Повторяем код ниже каждую минуту
   delayInMinutes: 1,
@@ -36,15 +98,3 @@ function showNotification(data) {
     });
   }
 }
-
-// setInterval(() => {
-//     fetch('http://192.168.84.136:3000/messages')
-//         .then(response => {
-//             return response.json();
-//         })
-//         .then(data => {
-//             if (data.length) {
-//                 showNotification(data);
-//             }
-//         });
-// }, 5000);

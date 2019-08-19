@@ -3,9 +3,7 @@ const express = require('express'),
   http = require('http').Server(app),
   io = require('socket.io')(http),
   db = require('./queries'),
-  path = require('path'),
-  bodyParser = require('body-parser'),
-  loginRouter = require('./routes/login');
+  path = require('path');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -23,8 +21,6 @@ app.post('/', (req, res, next) => {
     }
   });
 });
-
-//app.use('/', loginRouter);
 
 const connectedUsers = {};
 
@@ -45,12 +41,14 @@ io.on('connection', socket => {
     db.getMessages(1, userId).then(messages => {
       connectedUsers[userId].emit('private message', messages);
     });
-    db.getMessages(1, 0).then(messages => {
+    db.getMessages(1, '_chat').then(messages => {
       connectedUsers[userId].emit('chat message', messages);
     });
   });
 
   socket.on('chat message', msg => {
+    console.log(msg);
+    
     db.createMessage(msg);
     socket.broadcast.emit('chat message', [msg]);
   });

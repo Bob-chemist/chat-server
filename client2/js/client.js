@@ -1,5 +1,5 @@
-const socket = io.connect('http://localhost:3000'); //Подключаемся к нашему соккету
-const me = 2;
+﻿const socket = io.connect('http://localhost:3000'); //Подключаемся к нашему соккету
+const me = '1q';
 users = {[me]: 'John'};
 const messageInput = document.getElementById('m');
 
@@ -43,7 +43,7 @@ socket.on('userList', userList => {
 
 function send() {
     const input = document.getElementById('m'),
-    receiver  = +document.querySelector('.selected').id.match(/[0-9]/g),
+    receiver  = document.querySelector('.selected').id.substr('userNameId'.length),
     message = {
         author: me,
         message: input.value,
@@ -101,7 +101,7 @@ const addMessage = (msg) => {
 const chooseChat = event => {
     document.querySelector('.selected').classList.remove('selected');
     event.target.classList.add('selected');
-    let userId = +event.target.id.match(/[0-9]/g);
+    let userId = event.target.id.substr('userNameId'.length);
     Array.from(document.getElementById('chat-window').children).forEach(el => el.style.display = 'none');
     document.getElementById('chatId' + userId).style.display = '';
 }

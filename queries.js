@@ -2,7 +2,7 @@ const pgp = require("pg-promise")(),
     db = pgp("postgres://postgres:postgres@localhost:5432/notifications");
 
 const getMessages = (id = 0, receiver) => {
-    return db.any("select * from notification where id > $1 and receiver = $2 or author = $2 and receiver <> 0 order by id", [id, receiver])
+    return db.any("select * from notification where id > $1 and receiver like $2 or (author like $2 and receiver not like '_chat') order by id", [id, receiver])
         .then(data => data);
 };
 
@@ -15,25 +15,18 @@ const createMessage = ({author, message, receiver}) => {
 
 const getUserNames = author => {
     return db.any(
-        'select userid, name from users where userid <> $1', [author]
+        "select userid, name from users", [author]
     ).then(data => data)
 }
 
 const getPreviousMessages = (author, receiver, timestamp) => {
     return db.any(
-        'select * from notification where id > $3 and author = $1 and receiver = $2 order by id desc limit 10', [author, receiver, timestamp])
+        'select * from notification where id > $3 and author like $1 and receiver like $2 order by id desc limit 10', [author, receiver, timestamp])
         .then(data => data);
-}
-
-const authorize = (login, password) => {
-    return db.oneOrNone(
-        'select distinct userid, name from users where name like $1 and password like $2', [login, password])
-        .then(data => data);    
 }
 
 module.exports = {
     getMessages,
     createMessage,
-    getUserNames,
-    authorize,
+    getUserNames,    
 };
