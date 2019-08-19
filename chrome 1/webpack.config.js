@@ -1,33 +1,29 @@
 const webpack = require('webpack');
-const ejs = require('ejs');
+
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WebpackShellPlugin = require('webpack-shell-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ChromeExtensionReloader = require('webpack-chrome-extension-reloader');
-const { VueLoaderPlugin } = require('vue-loader');
+
 const { version } = require('./package.json');
 
 const config = {
   mode: process.env.NODE_ENV,
   context: __dirname + '/src',
   entry: {
-    'background': './background.js',
+    background: './background.js',
     'popup/popup': './popup/popup.js',
-    'options/options.js': './options/options.js'
+    'options/options': './options/options.js',
   },
   output: {
     path: __dirname + '/dist',
     filename: '[name].js',
   },
   resolve: {
-    extensions: ['.js', '.vue'],
+    extensions: ['.js'],
   },
   module: {
     rules: [
-      {
-        test: /\.vue$/,
-        loaders: 'vue-loader',
-      },
       {
         test: /\.js$/,
         loader: 'babel-loader',
@@ -43,7 +39,11 @@ const config = {
       },
       {
         test: /\.sass$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader?indentedSyntax'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader?indentedSyntax',
+        ],
       },
       {
         test: /\.(png|jpg|gif|svg|ico)$/,
@@ -55,23 +55,29 @@ const config = {
     ],
   },
   plugins: [
-    new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
     new CopyWebpackPlugin([
       { from: 'icons', to: 'icons', ignore: ['icon.xcf'] },
-      { from: 'popup/popup.html', to: 'popup/popup.html', transform: transformHtml },
-      { from: 'options/options.html', to: 'options/options.html', transform: transformHtml },     
+      {
+        from: 'popup/popup.html',
+        to: 'popup/popup.html',
+      },
+      {
+        from: 'options/options.html',
+        to: 'options/options.html',
+      },
       {
         from: 'manifest.json',
         to: 'manifest.json',
-        transform: (content) => {
+        transform: content => {
           const jsonContent = JSON.parse(content);
           jsonContent.version = version;
 
           if (config.mode === 'development') {
-            jsonContent['content_security_policy'] = "script-src 'self' 'unsafe-eval'; object-src 'self'";
+            jsonContent['content_security_policy'] =
+              "script-src 'self' 'unsafe-eval'; object-src 'self'";
           }
 
           return JSON.stringify(jsonContent, null, 2);
@@ -98,12 +104,6 @@ if (process.env.HMR === 'true') {
   config.plugins = (config.plugins || []).concat([
     new ChromeExtensionReloader(),
   ]);
-}
-
-function transformHtml(content) {
-  return ejs.render(content.toString(), {
-    ...process.env,
-  });
 }
 
 module.exports = config;

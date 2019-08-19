@@ -16,28 +16,32 @@ body {
 .input input {
   border: 0;
   padding: 10px;
-  width: 90%;
+  width: 80%;
   margin-right: 0.5%;
 }
 .input button {
-  width: 9%;
+  width: 18%;
   background: rgb(130, 224, 255);
   border: none;
   padding: 10px;
 }
 
 .chat {
+  width: 400px;
+  height: 300px;
   display: flex;
 }
 .chat-window {
-  width: 45%;
+  width: 70%;
   margin: 5px;
   padding: 10px 0 0 10px;
 }
 .users-window {
-  width: 10%;
+  width: 30%;
   margin: 5px;
   padding: 10px 0 0 10px;
+}
+.users-list {
 }
 .users-list .online {
   color: green;
@@ -71,9 +75,11 @@ body {
   list-style-type: none;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
 }
 .chat-window li {
   padding: 5px 10px;
+  overflow-wrap: break-word;
 }
 .chat-window li:nth-child(odd) {
   background: #eee;
@@ -81,5 +87,5 @@ body {
 
 .userchat {
   overflow-y: auto;
-  max-height: 90vh;
+  max-height: 210px;
 }

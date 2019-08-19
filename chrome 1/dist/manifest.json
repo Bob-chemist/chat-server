@@ -3,13 +3,17 @@
   "name": "Уведомления",
   "description": "Для разработчиков ПФР портала",
   "version": "1.0.0",
-  "icons": {"128": "icons/icon_128.png"},
+  "icons": {
+    "128": "icons/icon_128.png"
+  },
   "browser_action": {
     "default_icon": "icons/icon_128.png",
     "default_popup": "popup/popup.html"
   },
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "background.js"
+    ],
     "persistent": false
   },
   "commands": {
@@ -20,11 +24,13 @@
       "description": "Opens popup.html"
     }
   },
+  "options_page": "options/options.html",
   "permissions": [
     "cookies",
     "tabs",
     "alarms",
     "notifications",
     "storage"
-  ]
+  ],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
