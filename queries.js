@@ -1,6 +1,20 @@
 const pgp = require('pg-promise')(),
   db = pgp('postgres://postgres:postgres@localhost:5432/notifications');
 
+const getUnseenMessages = userId => {
+  return db.any(
+    ' select * from notification where id > (select last_seen from users where userid like $1) and receiver like \'_chat\' ' + 
+    '   union ' +
+    ' select author, n.id, message, receiver from notification n inner join users u on u.userid like n.receiver where n.id > u.last_seen and u.userid like $1',
+  [userId]
+  ).then(data => data);  
+}
+
+const getMessagesByUser = (userId, companionId) => {
+  return db.any('select * from notification where (author like $1 and receiver like $2) or (author like $2 and receiver like $1) ' + 
+    'and id < (select last_seen from users where userid like $1) order by id limit 10', [userId, companionId]).then(data => data);
+}
+
 const getMessages = (id = 0, receiver) => {
   return db
     .any(
@@ -10,15 +24,15 @@ const getMessages = (id = 0, receiver) => {
     .then(data => data);
 };
 
-const createMessage = ({ author, message, receiver }) => {
+const createMessage = ({ author, id, message, receiver }) => {
   return db.none(
     'INSERT INTO notification (author, id, message,  receiver) VALUES ($1, $2, $3, $4)',
-    [author, new Date().getTime(), message, receiver]
+    [author, +id, message, receiver]
   );
 };
 
-const getUserNames = author => {  
-    return db.any('select userid, name from users', [author]).then(data => data);
+const getUserNames = () => {  
+    return db.any('select userid, name, last_seen from users').then(data => data);
   
 };
 
@@ -39,6 +53,8 @@ const setLastSeen = userId => {
 }
 
 module.exports = {
+  getUnseenMessages,
+  getMessagesByUser,
   getMessages,
   createMessage,
   getUserNames,

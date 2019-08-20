@@ -22,7 +22,8 @@ app.post('/', (req, res, next) => {
   });
 });
 
-const connectedUsers = {};
+const connectedUsers = {},
+  users = db.getUserNames();
 
 io.on('connection', socket => {
   socket.on('name', userId => {
@@ -38,28 +39,44 @@ io.on('connection', socket => {
   });
 
   socket.on('userList loaded', userId => {
-    db.getMessages(1, userId).then(messages => {
-      connectedUsers[userId].emit('private message', messages);
+    let userMessages = [];
+    for (let key in users) {
+      if (key === userId) {
+        continue;
+      }
+      if (object.hasOwnProperty(key)) {
+        const user = users[key];
+        db.getMessagesByUser(userId, user.id).then(messages => {
+          userMessages = [...userMessages, ...messages];
+        });
+      }
+    }
+    connectedUsers[userId].emit('private message', userMessages);
+    // let unseenMessages = [];
+    db.getUnseenMessages(userId).then(messages => {
+      console.log(messages);      
+      connectedUsers[userId].emit('unseen messages', messages);
     });
-    db.getMessages(1, '_chat').then(messages => {
+    
+    db.getMessagesByUser(userId, '_chat').then(messages => {
       connectedUsers[userId].emit('chat message', messages);
     });
   });
 
   socket.on('user online', userId => {
-    db.setLastSeen(userId);
+    setTimeout(() => db.setLastSeen(userId), 10000);
   })
 
   socket.on('chat message', msg => {
     console.log(msg);
-
+    msg.id = new Date().getTime();
     db.createMessage(msg);
     socket.broadcast.emit('chat message', [msg]);
   });
 
   socket.on('private message', msg => {
     console.log(msg);
-
+    msg.id = new Date().getTime();
     db.createMessage(msg);
     if (connectedUsers[msg.receiver]) {
       connectedUsers[msg.receiver].emit('private message', [msg]);
