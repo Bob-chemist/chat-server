@@ -4,7 +4,7 @@ const pgp = require('pg-promise')(),
 const getMessages = (id = 0, receiver) => {
   return db
     .any(
-      'select * from notification where id > $1 and receiver like $2 or (author like $2 and receiver not like "_chat") order by id',
+      'select * from notification where id > $1 and receiver like $2 or (author like $2 and receiver not like \'_chat\') order by id',
       [id, receiver]
     )
     .then(data => data);
@@ -17,8 +17,9 @@ const createMessage = ({ author, message, receiver }) => {
   );
 };
 
-const getUserNames = author => {
-  return db.any('select userid, name from users', [author]).then(data => data);
+const getUserNames = author => {  
+    return db.any('select userid, name from users', [author]).then(data => data);
+  
 };
 
 const getPreviousMessages = (author, receiver, timestamp) => {
@@ -30,8 +31,16 @@ const getPreviousMessages = (author, receiver, timestamp) => {
     .then(data => data);
 };
 
+const setLastSeen = userId => {  
+  return db.none(
+    'update users set last_seen = $2 where userid like $1',
+    [userId, new Date().getTime()]
+  );
+}
+
 module.exports = {
   getMessages,
   createMessage,
   getUserNames,
+  setLastSeen,
 };

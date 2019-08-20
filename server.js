@@ -46,6 +46,10 @@ io.on('connection', socket => {
     });
   });
 
+  socket.on('user online', userId => {
+    db.setLastSeen(userId);
+  })
+
   socket.on('chat message', msg => {
     console.log(msg);
 
