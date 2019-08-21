@@ -22,14 +22,18 @@ app.post('/', (req, res, next) => {
   });
 });
 
-const connectedUsers = {},
-  users = db.getUserNames();
+const connectedUsers = {};
+  
+  
+
 
 io.on('connection', socket => {
   socket.on('name', userId => {
     connectedUsers[userId] = socket;
     console.log(userId + ' connected');
-    db.getUserNames(userId).then(userList => {
+    db.getUserNames().then(userList => {
+      console.log(userList);
+      
       userList.forEach(user => {
         user.connected = connectedUsers[user.userid] ? true : false;
       });
@@ -39,32 +43,40 @@ io.on('connection', socket => {
   });
 
   socket.on('userList loaded', userId => {
-    let userMessages = [];
-    for (let key in users) {
-      if (key === userId) {
-        continue;
-      }
-      if (object.hasOwnProperty(key)) {
-        const user = users[key];
-        db.getMessagesByUser(userId, user.id).then(messages => {
-          userMessages = [...userMessages, ...messages];
+    
+    db.getUserNames().then(users => {
+      for (let i = 0; i < users.length; i++) {        
+        const user = users[i];
+        if (user.userid === userId) {
+          continue;
+        }
+        db.getMessagesByUser(userId, user.userid).then(messages => {
+          console.log('user ', user.userid, messages);
+          if (messages.length) {
+            connectedUsers[userId].emit('old messages', messages);
+          }
         });
-      }
-    }
-    connectedUsers[userId].emit('private message', userMessages);
-    // let unseenMessages = [];
+      }  
+    }).catch(err => console.log(err));
+
     db.getUnseenMessages(userId).then(messages => {
-      console.log(messages);      
-      connectedUsers[userId].emit('unseen messages', messages);
+      console.log('unseen', messages);
+      if (messages.length) {
+        connectedUsers[userId].emit('unseen messages', messages);
+      }
     });
     
-    db.getMessagesByUser(userId, '_chat').then(messages => {
-      connectedUsers[userId].emit('chat message', messages);
+    db.getChatMessages(userId).then(messages => {
+      console.log('chat', messages);
+      if (messages.length) {
+        connectedUsers[userId].emit('old messages', messages);
+      }
+      
     });
   });
 
   socket.on('user online', userId => {
-    setTimeout(() => db.setLastSeen(userId), 10000);
+    db.setLastSeen(userId);
   })
 
   socket.on('chat message', msg => {
@@ -80,6 +92,23 @@ io.on('connection', socket => {
     db.createMessage(msg);
     if (connectedUsers[msg.receiver]) {
       connectedUsers[msg.receiver].emit('private message', [msg]);
+    }
+  });
+
+  socket.on('get old', msg => {
+    const {userId, companionId, latest} = msg;
+    if (companionId !== '_chat') {
+      db.getOldMessages(userId, companionId, latest).then(messages => {
+        if (messages.length) {
+          connectedUsers[userId].emit('old messages', messages);
+        }
+      });
+    } else {
+      db.getOldChatMessages(latest).then(messages => {
+        if (messages.length) {
+          connectedUsers[userId].emit('old messages', messages);
+        }    
+      })
     }
   });
 
