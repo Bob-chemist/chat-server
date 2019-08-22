@@ -1,6 +1,6 @@
 {
-  "name": "socket",
-  "version": "1.0.0",
+  "name": "chat-server",
+  "version": "1.0.1",
   "description": "Chat",
   "main": "server.js",
   "dependencies": {
@@ -10,10 +10,7 @@
   },
   "devDependencies": {
     "eslint": "^6.2.1",
-    "eslint-config-prettier": "^6.1.0",
-    "eslint-plugin-prettier": "^3.1.0",
-    "jest": "^24.9.0",
-    "prettier": "1.18.2"
+    "jest": "^24.9.0"
   },
   "scripts": {
     "test": "jest",

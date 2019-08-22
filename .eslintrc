@@ -4,16 +4,9 @@
     "node": true,
     "es6": true
   },
-  "extends": ["prettier"],
-  "plugins": ["prettier"],
-  "rules": {
-    "prettier/prettier": [
-      "error",
-      {
-        "singleQuote": true
-      }
-    ],
-    "quotes": ["error", "single"]
+    "rules": {    
+    "quotes": ["error", "single"],
+    "indent": ["error", 2, {"VariableDeclarator": {"var": 2, "let": 2, "const": 3}}]
   },
   "parserOptions": {
     "sourceType": "module"
