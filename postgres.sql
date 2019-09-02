@@ -13,6 +13,7 @@ create table users
 (
     userid    varchar   not null,
     name      varchar   not null,
+    password  varchar   not null,
     id        serial    not null
         constraint users_pk
             primary key,

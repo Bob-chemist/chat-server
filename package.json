@@ -1,6 +1,6 @@
 {
-  "name": "chat-server",
-  "version": "1.0.1",
+  "name": "socket",
+  "version": "1.0.0",
   "description": "Chat",
   "main": "server.js",
   "dependencies": {
