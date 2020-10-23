@@ -57,7 +57,7 @@ function send() {
       message: input.value,
       receiver,
     };
-  receiver !== 0
+  receiver !== '_chat'
     ? socket.emit('private message', message)
     : socket.emit('chat message', message);
   input.value = '';
@@ -97,10 +97,10 @@ const addMessage = msg => {
     date = new Date().toLocaleString();
   }
 
-  li.innerHTML = users[msg.author] + ' [' + date + ']: <br>' + msg.message;
-  if (+msg.receiver === 0) {
-    document.getElementById('userChatId0').appendChild(li);
-  } else if (+msg.author === me) {
+  li.innerHTML = users[msg.author].name + ' [' + date + ']: <br>' + msg.message;
+  if (msg.receiver === '_chat') {
+    document.getElementById('userChatId_chat').appendChild(li);
+  } else if (msg.author === me) {
     document.getElementById('userChatId' + msg.receiver).appendChild(li);
   } else {
     document.getElementById('userChatId' + msg.author).appendChild(li);

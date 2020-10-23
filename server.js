@@ -54,10 +54,10 @@ io.on('connection', socket => {
     connectedUsers[userId].emit('private message', userMessages);
     // let unseenMessages = [];
     db.getUnseenMessages(userId).then(messages => {
-      console.log(messages);      
+      console.log(messages);
       connectedUsers[userId].emit('unseen messages', messages);
     });
-    
+
     db.getMessagesByUser(userId, '_chat').then(messages => {
       connectedUsers[userId].emit('chat message', messages);
     });
@@ -65,7 +65,7 @@ io.on('connection', socket => {
 
   socket.on('user online', userId => {
     setTimeout(() => db.setLastSeen(userId), 10000);
-  })
+  });
 
   socket.on('chat message', msg => {
     console.log(msg);
